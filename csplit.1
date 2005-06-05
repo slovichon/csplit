@@ -1,0 +1,31 @@
+.\" $Id$
+.Dd May 21, 2005
+.Dt CSPLIT 1
+.Os
+.Sh NAME
+.Nm csplit
+.Nd split files based on context
+.Sh SYNOPSIS
+.Nm csplit
+.Op Fl ks
+.Op Fl f Ar prefix
+.Op Fl n Ar number
+.Ar file arg ...
+.Sh DESCRIPTION
+The following options are available:
+.Bl -tag -width Ds
+.It Fl f Ar prefix
+Specify the prefix of the output filenames.
+Defaults to
+.Dq xx .
+.It Fl k
+Do not clean up (remove) generated files on errors.
+.It Fl n Ar number
+Specify the number of digits to be used in output filename creation.
+Defaults to two.
+.It Fl s
+Silent:
+do not output generated file sizes.
+.El
+.Sh SEE ALSO
+.Xr split 1
