@@ -216,18 +216,18 @@ again:
 		siz = 0;
 		switch (csa->csa_type) {
 		case CST_REXP:
-			if ()
-			while (fgets(ln, sizeof(ln), infp) != NULL) {
-				if (regcomp())
-			}
-			break;
+//			if ()
+//			while (fgets(ln, sizeof(ln), infp) != NULL) {
+//				if (regcomp())
+//			}
+//			break;
 		case CST_LINENO:
 			while ((ch = fgetc(infp)) != EOF) {
 				if (ch == '\n')
 					lineno++;
 				fputc(ch, outfp);
 				siz++;
-				if (lineno == csa->csa_lineno->csl_lineno)
+				if (lineno == csa->csa_lineno.csl_lineno)
 					break;
 			}
 			break;
@@ -235,7 +235,7 @@ again:
 			fatal("internal error");
 			/* NOTREACHED */
 		}
-		printf("%ld\n", siz);
+		printf("%lld\n", siz);
 		curfileno++;
 		if (--csa->csa_repeat)
 			goto again;
