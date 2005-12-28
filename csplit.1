@@ -4,7 +4,7 @@
 .Os
 .Sh NAME
 .Nm csplit
-.Nd split files based on context
+.Nd contextually split files
 .Sh SYNOPSIS
 .Nm csplit
 .Op Fl ks
@@ -12,6 +12,13 @@
 .Op Fl n Ar number
 .Ar file arg ...
 .Sh DESCRIPTION
+.Nm
+breaks the content of
+.Ar file
+into several pieces and writes each to a separate file as specified by the
+.Ar arg
+arguments.
+.Pp
 The following options are available:
 .Bl -tag -width Ds
 .It Fl f Ar prefix
