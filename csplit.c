@@ -7,6 +7,7 @@
 #include <err.h>
 #include <limits.h>
 #include <regex.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -174,16 +175,19 @@ compile(char **args)
 			case '{':
 				if ((s = strrchr(++*arg, '}')) == NULL)
 					err(1, "%s: repeat missing '}'", *arg);
+				*s = '\0';
 				repeat = strtonum(*arg, 0, INT_MAX, &errstr);
 				if (errstr != NULL)
-					err(1, "%s: %s", *arg, errstr);
-				if (csa)
+					errx(1, "%s: %s", *arg, errstr);
+				if (repeat == 0)
+					repeat = 1;
+				if (csa == NULL)
 					err(1, "no previous argument "
 					    "to repeat");
 				csa->csa_repeat = repeat;
 				break;
 			default:
-				err(1, "%s: invalid argument", *arg);
+				errx(1, "%s: invalid argument", *arg);
 				/* NOTREACHED */
 			}
 		}
@@ -194,8 +198,8 @@ void
 csplit(const char *fn)
 {
 	char outfn[NAME_MAX], ln[LINE_MAX];
+	int csalineno, ch;
 	struct cs_arg *csa;
-	int lineno, ch;
 	FILE *infp, *outfp;
 	off_t siz;
 
@@ -204,9 +208,13 @@ csplit(const char *fn)
 	else if ((infp = fopen(fn, "r")) == NULL)
 		err(1, "%s", fn);
 
+	outfp = NULL; /* gcc */
 	curfileno = 0;
 	SLIST_FOREACH(csa, &cs_args, csa_next) {
 again:
+		if (feof(infp))
+			break;
+		csalineno = 1;
 		snprintf(outfn, sizeof(outfn), "%s%0*d", prefix,
 		    ndigits, curfileno);
 		if ((outfp = fopen(outfn, "w")) == NULL) {
@@ -216,19 +224,21 @@ again:
 		siz = 0;
 		switch (csa->csa_type) {
 		case CST_REXP:
-//			if ()
-//			while (fgets(ln, sizeof(ln), infp) != NULL) {
-//				if (regcomp())
-//			}
-//			break;
+/*
+			if ()
+			while (fgets(ln, sizeof(ln), infp) != NULL) {
+				if (regexec())
+			}
+*/
+			break;
 		case CST_LINENO:
 			while ((ch = fgetc(infp)) != EOF) {
-				if (ch == '\n')
-					lineno++;
 				fputc(ch, outfp);
 				siz++;
-				if (lineno == csa->csa_lineno.csl_lineno)
-					break;
+				if (ch == '\n')
+					if (++csalineno ==
+					    csa->csa_lineno.csl_lineno)
+						break;
 			}
 			break;
 		default:
@@ -240,6 +250,8 @@ again:
 		if (--csa->csa_repeat)
 			goto again;
 	}
+	while ((ch = fgetc(infp)) != EOF)
+		fputc(ch, outfp);
 	fclose(infp);
 }
 
@@ -251,7 +263,7 @@ fatal(const char *fmt, ...)
 	int i;
 
 	if (!keep) {
-		for (i = 0; i <= curfileno; i++)
+		for (i = 0; i <= curfileno; i++) {
 			snprintf(outfn, sizeof(outfn), "%s%0*d", prefix,
 			    ndigits, i);
 //			unlink(outfn);
